@@ -1,9 +1,8 @@
-const Files_To_Cache = [
+const FILES_TO_CACHE = [
     '/',
-    '/public',
-    '/public/index.html',
-    '/public/index.js',
-    '/public/styles.css'
+    '/index.html',
+    '/index.js',
+    '/styles.css'
 ]
 
 
@@ -22,7 +21,7 @@ self.addEventListener("install", function(event) {
 })
 
 self.addEventListener("active", function(event) {
-    event.waitUntil{
+    event.waitUntil(
         caches.keys().then(keyList => {
             return Promise.all(
                 keyList.map(key => {
@@ -33,7 +32,7 @@ self.addEventListener("active", function(event) {
                 })
             )
         })
-    }
+    )
     self.clients.claim()
 })
 
