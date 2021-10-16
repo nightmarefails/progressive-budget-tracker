@@ -9,7 +9,7 @@ request.onupgradeneeded = event => {
     db = event.target.result
 
     if (db.objectStoreNames.length === 0) {
-        db.createObjectStore('budgetStore', {autoIncrement: true })
+        db.createObjectStore('budgetStore', { autoIncrement: true })
     }
 }
 
@@ -19,6 +19,8 @@ request.onerror = event => {
 
 function checkDatabase() {
 
+    console.log("Checking Database")
+
     // open a transaction
     let transaction = db.transaction(['budgetStore'], 'readwrite')
 
@@ -27,27 +29,29 @@ function checkDatabase() {
     const getData = store.getAll()
 
     // on success
-    if (getData.result.length > 0) {
-        fetch('api/transaction/bulk', {
-            method: 'POST',
-            body: JSON.stringify(getData.result),
-            headers: {
-                Accept: 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(res => {
-            if (res.length !== 0) {
-                transaction = db.transaction(['budgetStore'], 'readwrite')
+    getData.onsuccess = () => {
+        if (getData.result.length > 0) {
+            fetch('api/transaction/bulk', {
+                method: 'POST',
+                body: JSON.stringify(getData.result),
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.length !== 0) {
+                        transaction = db.transaction(['budgetStore'], 'readwrite')
 
-                const curStore = transaction.objectStore('budgetStore')
+                        const curStore = transaction.objectStore('budgetStore')
 
-                currentStore.clear()
-            }
-        }) 
+                        curStore.clear()
+                    }
+                })
+        }
+
     }
-
 }
 
 request.onsuccess = event => {
